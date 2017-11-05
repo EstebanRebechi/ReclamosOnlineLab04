@@ -38,6 +38,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         intentOrigen = getIntent();
 
+        // Si el reclamo ya tenía un lugar, se pasa el lugar como extra para
+        // poner el marcador sobre ese lugar al iniciar la actividad
         lugar = intentOrigen.getParcelableExtra(LUGAR_KEY);
     }
 
@@ -56,11 +58,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         Integer zoom;
         if(lugar == null) { // Si no se pasó ningún lugar al crear la actividad
-            // agrego un marker aproximadamente al centro de Santa Fe
-            // y seteo el zoom para centrarlo en toda la ciudad
+            // creo el lugar con coordenadas aproximadamente al centro de Santa Fe
+            // y seteo el zoom para centrarlo sobre toda la ciudad
             lugar = new LatLng(-31.621, -60.704);
             zoom = 13;
-        } else { // si se pasó uno, seteo el zoom más cerca de ese lugar
+        } else { // si se pasó uno
+            // seteo el zoom más cerca de ese lugar
             zoom = 16;
         }
         mMap.addMarker(new MarkerOptions().position(lugar).draggable(true));
