@@ -6,4 +6,6 @@
     <string name="Reclamo_Actualizado">El reclamo ha sido actualizado</string>
     <string name="Actualizacion_Reclamo_Cancelada">El reclamo no ha sido actualizado</string>
     <string name="Reclamo_Eliminado">El reclamo ha sido eliminado</string>
+    <string name="map_info_text">Arrastre el marcador al lugar deseado.</string>
+    <string name="buttonListo">Listo</string>
 </resources>

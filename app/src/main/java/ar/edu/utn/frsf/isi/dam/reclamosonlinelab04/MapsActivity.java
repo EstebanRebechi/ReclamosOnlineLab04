@@ -1,18 +1,28 @@
 package ar.edu.utn.frsf.isi.dam.reclamosonlinelab04;
 
-import android.support.v4.app.FragmentActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    public static final String LUGAR_KEY = "lugar";
     private GoogleMap mMap;
+    private Button btn_listo;
+
+    private Intent intentOrigen;
+
+    private LatLng lugar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +32,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        btn_listo = (Button) findViewById(R.id.buttonListo);
+        btn_listo.setOnClickListener(new Listolistener());
+
+        intentOrigen = getIntent();
+
+        // Si el reclamo ya tenía un lugar, se pasa el lugar como extra para
+        // poner el marcador sobre ese lugar al iniciar la actividad
+        lugar = intentOrigen.getParcelableExtra(LUGAR_KEY);
     }
 
 
@@ -37,10 +56,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Integer zoom;
+        if(lugar == null) { // Si no se pasó ningún lugar al crear la actividad
+            // creo el lugar con coordenadas aproximadamente al centro de Santa Fe
+            // y seteo el zoom para centrarlo sobre toda la ciudad
+            lugar = new LatLng(-31.621, -60.704);
+            zoom = 13;
+        } else { // si se pasó uno
+            // seteo el zoom más cerca de ese lugar
+            zoom = 16;
+        }
+        mMap.addMarker(new MarkerOptions().position(lugar).draggable(true));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lugar, zoom));
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.setOnMarkerDragListener(new onMarkerDrag());
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+    }
+
+    private class onMarkerDrag implements GoogleMap.OnMarkerDragListener {
+
+        @Override
+        public void onMarkerDragStart(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDrag(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker marker) {
+            lugar = marker.getPosition();
+        }
+    }
+
+    private class Listolistener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            intentOrigen.putExtra(LUGAR_KEY, lugar);
+            setResult(RESULT_OK, intentOrigen);
+            finish();
+        }
     }
 }
