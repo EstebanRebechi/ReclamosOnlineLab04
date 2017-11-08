@@ -122,6 +122,9 @@ public class FormReclamo extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(FormReclamo.this,MapsActivity.class);
+            if(lugar != null) {
+                intent.putExtra(MapsActivity.LUGAR_KEY, lugar);
+            }
             startActivityForResult(intent, MAP_REQ);
         }
     }
@@ -214,7 +217,7 @@ public class FormReclamo extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == MAP_REQ) {
             if(resultCode == RESULT_OK) {
-                lugar = data.getParcelableExtra("lugar");
+                lugar = data.getParcelableExtra(MapsActivity.LUGAR_KEY);
                 editTextLugar.setText(lugar.toString());
             }
         }
