@@ -22,34 +22,33 @@ public class HttpAsyncTask extends AsyncTask {
 
         ReclamoDao reclamoDao = new ReclamoDaoHTTP();
         Reclamo nuevoReclamo = (Reclamo) objects[0];
-        Boolean esNuevo = (Boolean) objects[1];
-        Boolean obtieneReclamos = (Boolean)objects[2];
-        Boolean obtieneID = (Boolean)objects[3];
-        int id = (int)objects[4];
-        Boolean elimina = (Boolean)objects[5];
+        int opcion = (int)objects[1];
+        int id = (int)objects[2];
 
         List<Reclamo> reclamos;
         Estado estado;
         try {
 
-            if (obtieneReclamos){
-                reclamos = reclamoDao.reclamos();
+            switch (opcion){
+                case 1:
+                    reclamoDao.crear(nuevoReclamo);
+                    break;
+                case 2:
+                    reclamoDao.actualizar(nuevoReclamo);
+                    break;
+                case 3:
+                    reclamoDao.borrar(nuevoReclamo);
+                    break;
+                case 4:
+                    reclamos = reclamoDao.reclamos();
+                    return reclamos;
+                case 5:
+                    estado = reclamoDao.getEstadoById(id);
 
-                return reclamos;
-            }
-            if (obtieneID){
-                estado = reclamoDao.getEstadoById(id);
+                    return estado;
+                default:
+                    break;
 
-                return estado;
-            }
-            if(elimina){
-                reclamoDao.borrar(nuevoReclamo);
-            }
-            if(esNuevo){
-                reclamoDao.crear(nuevoReclamo);
-            }
-            else if(!esNuevo){
-                reclamoDao.actualizar(nuevoReclamo);
             }
 
         }catch (Exception e){

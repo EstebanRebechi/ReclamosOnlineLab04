@@ -155,7 +155,7 @@ public class FormReclamo extends AppCompatActivity {
 
                 // creo el reclamo y lo paso a la capa dao para guardar
                 Reclamo nuevoReclamo = new Reclamo(id, titulo, detalle, fecha, tipoReclamo, estado, lugar);
-                new HttpAsyncTask().execute(nuevoReclamo, esNuevo, false, false, 0, false);
+                new HttpAsyncTask().execute(nuevoReclamo, 1, 0);
             } else {
                 // seteo los atributos del reclamo existente y lo paso a la capa dao para actualizar
                 reclamo.setTitulo(titulo);
@@ -163,7 +163,7 @@ public class FormReclamo extends AppCompatActivity {
                 reclamo.setTipo(tipoReclamo);
                 reclamo.setLugar(lugar);
 
-                new HttpAsyncTask().execute(reclamo, esNuevo, false, false, 0, false);
+                new HttpAsyncTask().execute(reclamo, 2, 0);
             }
 
             setResult(RESULT_OK, intentOrigen);
@@ -175,7 +175,7 @@ public class FormReclamo extends AppCompatActivity {
         List<Reclamo> reclamos;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        reclamos = (List<Reclamo>) as.execute(null, false, true, false, 0, false).get();
+        reclamos = (List<Reclamo>) as.execute(null, 4, 0).get();
 
         int id = -1;
         for(Reclamo r : reclamos) {
@@ -190,7 +190,7 @@ public class FormReclamo extends AppCompatActivity {
         Estado estado;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        estado = (Estado) as.execute(null, false, false, true, id, false).get();
+        estado = (Estado) as.execute(null, 5, id).get();
 
         return estado;
     }
@@ -199,7 +199,7 @@ public class FormReclamo extends AppCompatActivity {
     private class EliminarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            new HttpAsyncTask().execute(reclamo, false, false, false, 0, true);
+            new HttpAsyncTask().execute(reclamo, 3, 0);
             setResult(RESULT_DELETED, intentOrigen);
             finish();
         }
