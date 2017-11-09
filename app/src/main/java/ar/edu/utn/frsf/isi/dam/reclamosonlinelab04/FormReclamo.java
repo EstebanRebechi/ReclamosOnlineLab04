@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.dao.ReclamoDao;
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.dao.ReclamoDaoHTTP;
@@ -136,15 +137,25 @@ public class FormReclamo extends AppCompatActivity {
             String titulo = editTextTitulo.getText().toString();
             String detalle = editTextDetalle.getText().toString();
             TipoReclamo tipoReclamo = (TipoReclamo) spinnerTipoReclamo.getSelectedItem();
+            Boolean esNuevo = false;
 
             if(flagNuevoReclamo) {
-                int id = obtenerNuevoID();
+                esNuevo = true;
+                Estado estado = null; //El estado para un nuevo reclamo es "enviado" y tiene id 1
+                int id = 0;
+                try {
+                    id = obtenerNuevoID();
+                    estado = getEstadoById(1);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 Date fecha = new Date();
-                Estado estado = reclamoDao.getEstadoById(1); //El estado para un nuevo reclamo es "enviado" y tiene id 1
 
                 // creo el reclamo y lo paso a la capa dao para guardar
                 Reclamo nuevoReclamo = new Reclamo(id, titulo, detalle, fecha, tipoReclamo, estado, lugar);
-                reclamoDao.crear(nuevoReclamo);
+                new HttpAsyncTask().execute(nuevoReclamo, 1, 0);
             } else {
                 // seteo los atributos del reclamo existente y lo paso a la capa dao para actualizar
                 reclamo.setTitulo(titulo);
@@ -152,7 +163,7 @@ public class FormReclamo extends AppCompatActivity {
                 reclamo.setTipo(tipoReclamo);
                 reclamo.setLugar(lugar);
 
-                reclamoDao.actualizar(reclamo);
+                new HttpAsyncTask().execute(reclamo, 2, 0);
             }
 
             setResult(RESULT_OK, intentOrigen);
@@ -160,8 +171,12 @@ public class FormReclamo extends AppCompatActivity {
         }
     }
 
-    private int obtenerNuevoID() {
-        List<Reclamo> reclamos = reclamoDao.reclamos();
+    private int obtenerNuevoID() throws ExecutionException, InterruptedException {
+        List<Reclamo> reclamos;
+        HttpAsyncTask as = new HttpAsyncTask();
+
+        reclamos = (List<Reclamo>) as.execute(null, 4, 0).get();
+
         int id = -1;
         for(Reclamo r : reclamos) {
             if(r.getId() > id) {
@@ -171,10 +186,20 @@ public class FormReclamo extends AppCompatActivity {
         return id + 1;
     }
 
+    private Estado getEstadoById(int id) throws ExecutionException, InterruptedException {
+        Estado estado;
+        HttpAsyncTask as = new HttpAsyncTask();
+
+        estado = (Estado) as.execute(null, 5, id).get();
+
+        return estado;
+    }
+
+
     private class EliminarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            reclamoDao.borrar(reclamo);
+            new HttpAsyncTask().execute(reclamo, 3, 0);
             setResult(RESULT_DELETED, intentOrigen);
             finish();
         }

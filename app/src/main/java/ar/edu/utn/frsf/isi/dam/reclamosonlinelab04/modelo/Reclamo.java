@@ -15,9 +15,7 @@ public class Reclamo implements Serializable{
     private String detalle;
     private Date fecha;
     private TipoReclamo tipo;
-
     private Estado estado;
-
     private LatLng lugar;
 
 
