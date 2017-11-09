@@ -73,6 +73,95 @@ public class MyGenericHTTPClient {
         return sb.toString();
     }
 
+    public String put(String recurso,Integer id,String jsonDataObject) {
+        StringBuilder sb = new StringBuilder();
+
+        HttpURLConnection urlConnection = null;
+        DataOutputStream printout =null;
+        try {
+            URL url = new URL(this.serverAddress+"/"+recurso+"/"+id);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.setRequestProperty("Content-Type","application/json");
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("PUT");
+            urlConnection.setUseCaches(false);
+            printout = new DataOutputStream(urlConnection.getOutputStream());
+            Log.d("TEST-ARR",jsonDataObject.toString());
+            Log.d("TEST-ARR", URLEncoder.encode(jsonDataObject.toString(),"UTF-8"));
+            String str = jsonDataObject.toString();
+            byte[] jsonData=str.getBytes("UTF-8");
+            printout.write(jsonData);
+//          printout.writeBytes(URLEncoder.encode(pedidoJSON.toString(),"UTF-8"));
+            printout.flush();
+
+            // leer las respuestas
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            InputStreamReader isw = new InputStreamReader(in);
+            int data = isw.read();
+            while (data != -1) {
+                char current = (char) data;
+                sb.append(current);
+                data = isw.read();
+            }
+            Log.d("TEST-ARR",sb.toString());
+
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(printout!=null) try {
+                printout.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(urlConnection !=null)urlConnection.disconnect();
+        }
+        return sb.toString();
+    }
+
+    public String delete(String recurso,Integer id) {
+        StringBuilder sb = new StringBuilder();
+
+        HttpURLConnection urlConnection = null;
+        DataOutputStream printout =null;
+        try {
+            URL url = new URL(this.serverAddress+"/"+recurso+"/"+id);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.setRequestProperty("Content-Type","application/json");
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("DELETE");
+            urlConnection.setUseCaches(false);
+
+            // leer las respuestas
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            InputStreamReader isw = new InputStreamReader(in);
+            int data = isw.read();
+            while (data != -1) {
+                char current = (char) data;
+                sb.append(current);
+                data = isw.read();
+            }
+            Log.d("TEST-ARR",sb.toString());
+
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(printout!=null) try {
+                printout.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(urlConnection !=null)urlConnection.disconnect();
+        }
+        return sb.toString();
+    }
 
     public String getAll(String recurso) {
         HttpURLConnection urlConnection = null;

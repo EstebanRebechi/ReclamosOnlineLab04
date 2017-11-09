@@ -9,4 +9,6 @@
     <string name="cargar_imagen">Cargar Foto</string>
     <string name="titulo_dialog">Solicitud de permisos</string>
     <string name="solicitud_permiso_foto">¿Desea permitir que la aplicación acceda a la cámara?</string>
+    <string name="map_info_text">Arrastre el marcador al lugar deseado.</string>
+    <string name="buttonListo">Listo</string>
 </resources>

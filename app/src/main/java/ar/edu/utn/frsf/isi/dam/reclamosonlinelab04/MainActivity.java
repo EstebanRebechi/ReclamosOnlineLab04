@@ -92,11 +92,11 @@ public class MainActivity extends AppCompatActivity {
                 switch(resultCode) {
                     case RESULT_OK: {
                         obtenerReclamos();
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Nuevo_Reclamo_Guardado), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Nuevo_Reclamo_Guardado), Toast.LENGTH_LONG).show();
                         break;
                     }
                     case RESULT_CANCELED: {
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Nuevo_Reclamo_Cancelado), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Nuevo_Reclamo_Cancelado), Toast.LENGTH_LONG).show();
                         break;
                     }
                 }
@@ -106,16 +106,16 @@ public class MainActivity extends AppCompatActivity {
                 switch(resultCode) {
                     case RESULT_OK: {
                         obtenerReclamos();
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Reclamo_Actualizado), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Reclamo_Actualizado), Toast.LENGTH_LONG).show();
                         break;
                     }
                     case RESULT_CANCELED: {
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Actualizacion_Reclamo_Cancelada), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Actualizacion_Reclamo_Cancelada), Toast.LENGTH_LONG).show();
                         break;
                     }
                     case FormReclamo.RESULT_DELETED: {
                         obtenerReclamos();
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Reclamo_Eliminado), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.Reclamo_Eliminado), Toast.LENGTH_LONG).show();
                         break;
                     }
                 }

@@ -2,123 +2,123 @@
   "reclamo": [
     {
       "id": 1,
-      "titulo":"Esquina Peligrosa",
+      "titulo": "Esquina Peligrosa",
       "detalle": "Necesitamos un semaforo de 4 tiempos con fotomulta",
       "fecha": "",
       "tipoId": 8,
-      "estadoId": 5      
+      "estadoId": 5
     },
     {
       "id": 2,
-      "titulo":"Ruidos Molestos",
+      "titulo": "Ruidos Molestos",
       "detalle": "Hay mucho ruido en la zona",
       "fecha": "",
       "tipoId": 3,
-      "estadoId": 2      
+      "estadoId": 2
     },
     {
       "id": 3,
-      "titulo":"Todo oscuro esto es un peligro",
+      "titulo": "Todo oscuro esto es un peligro",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 5,
-      "estadoId": 4      
+      "estadoId": 4
     },
     {
       "id": 4,
-      "titulo":"No pasa el colectivo",
+      "titulo": "No pasa el colectivo",
       "detalle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed ",
       "fecha": "",
       "tipoId": 6,
-      "estadoId": 2      
+      "estadoId": 2
     },
     {
       "id": 5,
-      "titulo":"Todo oscuro esto es un peligro",
+      "titulo": "Todo oscuro esto es un peligro",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 7,
-      "estadoId": 4      
+      "estadoId": 4
     },
     {
       "id": 6,
-      "titulo":"Faltan camaras",
+      "titulo": "Faltan camaras",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 2,
-      "estadoId": 3      
+      "estadoId": 3
     },
     {
       "id": 7,
-      "titulo":"Todo oscuro esto es un peligro",
+      "titulo": "Todo oscuro esto es un peligro",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 1,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 8,
-      "titulo":"La parada de colectivo no tiene techo",
+      "titulo": "La parada de colectivo no tiene techo",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 1,
-      "estadoId": 4      
+      "estadoId": 4
     },
     {
       "id": 9,
-      "titulo":"El tobogan sube y no baja",
+      "titulo": "El tobogan sube y no baja",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 3,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 10,
-      "titulo":"Expound the actual teachings",
+      "titulo": "Expound the actual teachings",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 1,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 11,
-      "titulo":"Pellentesque tortor magna.",
+      "titulo": "Pellentesque tortor magna.",
       "detalle": "Pellentesque tortor magna magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 1,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 12,
-      "titulo":"El tobogan sube y no baja",
+      "titulo": "El tobogan sube y no baja",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 1,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 13,
-      "titulo":" Nullam ultricies sapien odio,",
+      "titulo": " Nullam ultricies sapien odio,",
       "detalle": "c ac. Etiam tempus metus nec fui",
       "fecha": "",
       "tipoId": 4,
-      "estadoId": 2      
+      "estadoId": 2
     },
     {
       "id": 14,
-      "titulo":"La calesita no gira",
+      "titulo": "La calesita no gira",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 6,
-      "estadoId": 1      
+      "estadoId": 1
     },
     {
       "id": 15,
-      "titulo":"La ciclovia esta siempre colapsada",
+      "titulo": "La ciclovia esta siempre colapsada",
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 5,
-      "estadoId": 1      
+      "estadoId": 1
     }
   ],
   "tipo": [

@@ -37,8 +37,6 @@ public class TipoReclamo implements Serializable{
 
     @Override
     public String toString() {
-        return "TipoReclamo{" +
-                "tipo='" + tipo + '\'' +
-                '}';
+        return tipo;
     }
 }

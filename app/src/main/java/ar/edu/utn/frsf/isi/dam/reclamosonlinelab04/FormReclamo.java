@@ -25,6 +25,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.dao.ReclamoDao;
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.dao.ReclamoDaoHTTP;
@@ -36,6 +37,8 @@ public class FormReclamo extends AppCompatActivity {
 
     public static final int RESULT_DELETED = 2;
     private static final int PERMISSION_REQUEST_CAMERA = 1;
+
+    public static final int MAP_REQ = 1;
 
     private Intent intentOrigen;
 
@@ -56,6 +59,7 @@ public class FormReclamo extends AppCompatActivity {
 
     private Reclamo reclamo;
     private LatLng lugar;
+    private List<TipoReclamo> listaTiposReclamo;
 
     private boolean flagNuevoReclamo;
 
@@ -106,10 +110,23 @@ public class FormReclamo extends AppCompatActivity {
     }
 
     private void inicializarSpinner() {
-        ArrayList<TipoReclamo> tiposReclamo = new ArrayList<>();
-        tiposReclamo.addAll(reclamoDao.tiposReclamo());
-        ArrayAdapter<TipoReclamo> adapterTiposReclamo = new ArrayAdapter<TipoReclamo>(this, android.R.layout.simple_spinner_item, tiposReclamo);
+        listaTiposReclamo = new ArrayList<>();
+        ArrayAdapter<TipoReclamo> adapterTiposReclamo = new ArrayAdapter<TipoReclamo>(this, android.R.layout.simple_spinner_item, listaTiposReclamo);
         spinnerTipoReclamo.setAdapter(adapterTiposReclamo);
+        obtenerTiposReclamo();
+    }
+
+    private void obtenerTiposReclamo() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                List<TipoReclamo> rec = reclamoDao.tiposReclamo();
+                listaTiposReclamo.clear();
+                listaTiposReclamo.addAll(rec);
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void mostrarDatosReclamo() {
@@ -125,10 +142,11 @@ public class FormReclamo extends AppCompatActivity {
     private class ElegirLugarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            // TODO implementar
-            // Hay que hacer el intent para la actividad del mapa
-            // el lugar elegido ponerlo a la variable "lugar"
-            // actualizar el editTextLugar
+            Intent intent = new Intent(FormReclamo.this,MapsActivity.class);
+            if(lugar != null) {
+                intent.putExtra(MapsActivity.LUGAR_KEY, lugar);
+            }
+            startActivityForResult(intent, MAP_REQ);
         }
     }
 
@@ -140,15 +158,25 @@ public class FormReclamo extends AppCompatActivity {
             String titulo = editTextTitulo.getText().toString();
             String detalle = editTextDetalle.getText().toString();
             TipoReclamo tipoReclamo = (TipoReclamo) spinnerTipoReclamo.getSelectedItem();
+            Boolean esNuevo = false;
 
             if(flagNuevoReclamo) {
-                int id = obtenerNuevoID();
+                esNuevo = true;
+                Estado estado = null; //El estado para un nuevo reclamo es "enviado" y tiene id 1
+                int id = 0;
+                try {
+                    id = obtenerNuevoID();
+                    estado = getEstadoById(1);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 Date fecha = new Date();
-                Estado estado = reclamoDao.getEstadoById(1); //El estado para un nuevo reclamo es "enviado" y tiene id 1
 
                 // creo el reclamo y lo paso a la capa dao para guardar
                 Reclamo nuevoReclamo = new Reclamo(id, titulo, detalle, fecha, tipoReclamo, estado, lugar);
-                reclamoDao.crear(nuevoReclamo);
+                new HttpAsyncTask().execute(nuevoReclamo, 1, 0);
             } else {
                 // seteo los atributos del reclamo existente y lo paso a la capa dao para actualizar
                 reclamo.setTitulo(titulo);
@@ -157,7 +185,7 @@ public class FormReclamo extends AppCompatActivity {
                 reclamo.setLugar(lugar);
                 // TODO: SI TIENE FOTO GUARDAR. SI TIENE AUDIO HABILITAR REPRODUCIR. GUARDAR AUDIO.
 
-                reclamoDao.actualizar(reclamo);
+                new HttpAsyncTask().execute(reclamo, 2, 0);
             }
 
             setResult(RESULT_OK, intentOrigen);
@@ -232,8 +260,12 @@ public class FormReclamo extends AppCompatActivity {
         }
     }
 
-    private int obtenerNuevoID() {
-        List<Reclamo> reclamos = reclamoDao.reclamos();
+    private int obtenerNuevoID() throws ExecutionException, InterruptedException {
+        List<Reclamo> reclamos;
+        HttpAsyncTask as = new HttpAsyncTask();
+
+        reclamos = (List<Reclamo>) as.execute(null, 4, 0).get();
+
         int id = -1;
         for(Reclamo r : reclamos) {
             if(r.getId() > id) {
@@ -243,10 +275,20 @@ public class FormReclamo extends AppCompatActivity {
         return id + 1;
     }
 
+    private Estado getEstadoById(int id) throws ExecutionException, InterruptedException {
+        Estado estado;
+        HttpAsyncTask as = new HttpAsyncTask();
+
+        estado = (Estado) as.execute(null, 5, id).get();
+
+        return estado;
+    }
+
+
     private class EliminarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            reclamoDao.borrar(reclamo);
+            new HttpAsyncTask().execute(reclamo, 3, 0);
             setResult(RESULT_DELETED, intentOrigen);
             finish();
         }
@@ -257,6 +299,16 @@ public class FormReclamo extends AppCompatActivity {
         public void onClick(View view) {
             setResult(RESULT_CANCELED, intentOrigen);
             finish();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == MAP_REQ) {
+            if(resultCode == RESULT_OK) {
+                lugar = data.getParcelableExtra(MapsActivity.LUGAR_KEY);
+                editTextLugar.setText(lugar.toString());
+            }
         }
     }
 }

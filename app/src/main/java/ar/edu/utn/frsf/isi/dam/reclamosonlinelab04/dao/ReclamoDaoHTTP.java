@@ -1,10 +1,14 @@
 package ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.dao;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.Estado;
@@ -36,6 +40,7 @@ public class ReclamoDaoHTTP implements ReclamoDao {
 
     @Override
     public List<Estado> estados() {
+        tiposEstados = new ArrayList<>();
         if(tiposEstados!=null && tiposEstados.size()>0) return this.tiposEstados;
         else{
             String estadosJSON = cliente.getAll("estado");
@@ -54,6 +59,7 @@ public class ReclamoDaoHTTP implements ReclamoDao {
 
     @Override
     public List<TipoReclamo> tiposReclamo() {
+        tiposReclamos = new ArrayList<>();
         if(tiposReclamos!=null && tiposReclamos.size()>0) return this.tiposReclamos;
         else{
             String estadosJSON = cliente.getAll("tipo");
@@ -131,16 +137,89 @@ public class ReclamoDaoHTTP implements ReclamoDao {
 
     @Override
     public void crear(Reclamo r) {
+        String detalle = r.getDetalle();
+        Integer id = r.getId();
+        String titulo = r.getTitulo();
+        TipoReclamo tipo = r.getTipo();
+        Date fecha = r.getFecha();
+        Estado estado = r.getEstado();
+
+        JSONObject nuevoReclamoJson = new JSONObject();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String fechaStr = sdf.format(fecha);
+
+
+
+        try {
+            nuevoReclamoJson.put("id", id);
+            nuevoReclamoJson.put("titulo", titulo);
+            nuevoReclamoJson.put("detalle", detalle);
+            nuevoReclamoJson.put("fecha", fechaStr);
+            nuevoReclamoJson.put("tipoId",5);
+            nuevoReclamoJson.put("estadoId", estado.getId());
+
+            LatLng lugar = r.getLugar();
+            if(lugar!=null) {
+                Double latitud = lugar.latitude;
+                Double longitud = lugar.longitude;
+                String latStr = latitud.toString();
+                String longStr = longitud.toString();
+                nuevoReclamoJson.put("lugar", latStr + ";" + longStr);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        cliente.post("reclamo", nuevoReclamoJson.toString());
 
     }
 
     @Override
     public void actualizar(Reclamo r) {
+        Integer id = r.getId();
+
+        JSONObject reclamoJSON = new JSONObject();
+        try {
+
+            Date fecha = r.getFecha();
+
+            reclamoJSON.put("id", id);
+            reclamoJSON.put("titulo", r.getTitulo());
+            reclamoJSON.put("detalle", r.getDetalle());
+            if(fecha!=null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                String fechaStr = sdf.format(fecha);
+                reclamoJSON.put("fecha", fechaStr);
+            }
+            reclamoJSON.put("tipoId",r.getTipo().getId());
+            reclamoJSON.put("estadoId", r.getEstado().getId());
+
+            LatLng lugar = r.getLugar();
+            if(lugar!=null) {
+                Double latitud = lugar.latitude;
+                Double longitud = lugar.longitude;
+                String latStr = latitud.toString();
+                String longStr = longitud.toString();
+                reclamoJSON.put("lugar", latStr + ";" + longStr);
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        cliente.put("reclamo", id, reclamoJSON.toString());
 
     }
 
     @Override
     public void borrar(Reclamo r) {
+        Integer id = r.getId();
+
+        cliente.delete("reclamo", id);
 
     }
 }
