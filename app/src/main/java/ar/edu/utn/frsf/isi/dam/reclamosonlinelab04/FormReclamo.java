@@ -37,6 +37,7 @@ public class FormReclamo extends AppCompatActivity {
 
     public static final int RESULT_DELETED = 2;
     private static final int PERMISSION_REQUEST_CAMERA = 1;
+    private static final int PERMISSION_REQUEST_VOICE = 2;
 
     public static final int MAP_REQ = 1;
 
@@ -107,6 +108,7 @@ public class FormReclamo extends AppCompatActivity {
         btnEliminar.setOnClickListener(new EliminarListener());
         btnCancelar.setOnClickListener(new CancelarListener());
         btnCargarFoto.setOnClickListener(new CargarFotoListener());
+        btnGrabarAudio.setOnClickListener(new GrabarAudioListener());
     }
 
     private void inicializarSpinner() {
@@ -197,32 +199,39 @@ public class FormReclamo extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-
-
+            askForPermission(Manifest.permission.CAMERA, FormReclamo.PERMISSION_REQUEST_CAMERA, getString(R.string.solicitud_permiso_foto));
         }
     }
 
-    public void askForCameraPermission(){
+    private class GrabarAudioListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            askForPermission(Manifest.permission.RECORD_AUDIO, FormReclamo.PERMISSION_REQUEST_VOICE, getString(R.string.solicitud_permiso_audio));
+        }
+    }
+
+    public void askForPermission(final String permisoManifest, final int codigoPermiso, String rationaleMsgStr){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(FormReclamo.this,
-                    Manifest.permission.CAMERA)
+                    permisoManifest)
                     != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(FormReclamo.this,
-                        Manifest.permission.CAMERA)) {
+                        permisoManifest)) {
                     // Por lo que entiendo, esto lo pide solamente si ya intento varias veces y
                     // hay que hacerle una explicacion mas detallada de por que necesitamos el permiso
                     AlertDialog.Builder builder = new AlertDialog.Builder(FormReclamo.this);
                     builder.setTitle(R.string.titulo_dialog);
                     builder.setPositiveButton(android.R.string.ok,null);
-                    builder.setMessage(R.string.solicitud_permiso_foto);
+                    builder.setMessage(rationaleMsgStr);
                     builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @TargetApi(Build.VERSION_CODES.M)
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                             requestPermissions(
                                     new String[]
-                                            {Manifest.permission.CAMERA}
-                                    , PERMISSION_REQUEST_CAMERA);
+                                            {permisoManifest}
+                                    , codigoPermiso);
                         }
                     });
                     builder.show();
@@ -230,8 +239,8 @@ public class FormReclamo extends AppCompatActivity {
                     // Abre el dialogo para pedir el permiso del a camara.
                     ActivityCompat.requestPermissions(FormReclamo.this,
                             new String[]
-                                    {Manifest.permission.CAMERA},
-                            PERMISSION_REQUEST_CAMERA);
+                                    {permisoManifest},
+                            codigoPermiso);
                 }
             }else{
                 Toast.makeText(FormReclamo.this, "El permiso ya esta dado", Toast.LENGTH_SHORT).show();
@@ -250,10 +259,21 @@ public class FormReclamo extends AppCompatActivity {
                 // si el request es cancelado el arreglo es vacio.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(FormReclamo.this, "Lo pidio y acepto", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FormReclamo.this, "Pidio camara y acepto", Toast.LENGTH_SHORT).show();
                     // tengo el permiso!!!.
                 } else {
-                    Toast.makeText(FormReclamo.this, "Lo pidio y rechazo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FormReclamo.this, "Pidio camara y rechazo", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case FormReclamo.PERMISSION_REQUEST_VOICE: {
+                // si el request es cancelado el arreglo es vacio.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(FormReclamo.this, "Pidio audio y acepto", Toast.LENGTH_SHORT).show();
+                    // tengo el permiso!!!.
+                } else {
+                    Toast.makeText(FormReclamo.this, "Pidio audio y rechazo", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
