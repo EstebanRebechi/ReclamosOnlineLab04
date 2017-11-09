@@ -174,13 +174,15 @@ public class FormReclamo extends AppCompatActivity {
         }
     }
 
-    public void askForContactPermission(){
+    public void askForCameraPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(FormReclamo.this,
                     Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(FormReclamo.this,
                         Manifest.permission.CAMERA)) {
+                    // Por lo que entiendo, esto lo pide solamente si ya intento varias veces y
+                    // hay que hacerle una explicacion mas detallada de por que necesitamos el permiso
                     AlertDialog.Builder builder = new AlertDialog.Builder(FormReclamo.this);
                     builder.setTitle(R.string.titulo_dialog);
                     builder.setPositiveButton(android.R.string.ok,null);
@@ -197,6 +199,7 @@ public class FormReclamo extends AppCompatActivity {
                     });
                     builder.show();
                 } else {
+                    // Abre el dialogo para pedir el permiso del a camara.
                     ActivityCompat.requestPermissions(FormReclamo.this,
                             new String[]
                                     {Manifest.permission.CAMERA},
