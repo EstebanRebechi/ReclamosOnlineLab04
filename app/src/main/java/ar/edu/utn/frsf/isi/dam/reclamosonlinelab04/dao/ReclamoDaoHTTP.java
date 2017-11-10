@@ -149,8 +149,6 @@ public class ReclamoDaoHTTP implements ReclamoDao {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String fechaStr = sdf.format(fecha);
 
-
-
         try {
             nuevoReclamoJson.put("id", id);
             nuevoReclamoJson.put("titulo", titulo);
@@ -204,8 +202,6 @@ public class ReclamoDaoHTTP implements ReclamoDao {
                 String longStr = longitud.toString();
                 reclamoJSON.put("lugar", latStr + ";" + longStr);
             }
-
-
 
         } catch (JSONException e) {
             e.printStackTrace();

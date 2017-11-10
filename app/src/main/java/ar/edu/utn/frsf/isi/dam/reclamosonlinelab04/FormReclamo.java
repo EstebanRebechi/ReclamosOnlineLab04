@@ -3,11 +3,16 @@ package ar.edu.utn.frsf.isi.dam.reclamosonlinelab04;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.admin.ConnectEvent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +26,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,11 +45,12 @@ import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.TipoReclamo;
 
 public class FormReclamo extends AppCompatActivity {
 
-    public static final int RESULT_DELETED = 2;
-    private static final int PERMISSION_REQUEST_CAMERA = 1;
-    private static final int PERMISSION_REQUEST_VOICE = 2;
-
     public static final int MAP_REQ = 1;
+    public static final int RESULT_DELETED = 2;
+    private static final int PERMISSION_REQUEST_CAMERA = 3;
+    private static final int PERMISSION_REQUEST_VOICE = 4;
+    private static final int REQUEST_IMAGE_CAPTURE = 5;
+    private static final int RESULT_OK = 6;
 
     private Intent intentOrigen;
 
@@ -242,13 +253,13 @@ public class FormReclamo extends AppCompatActivity {
                                     {permisoManifest},
                             codigoPermiso);
                 }
-            }else{
-                Toast.makeText(FormReclamo.this, "El permiso ya esta dado", Toast.LENGTH_SHORT).show();
+            } else {
+                // El permiso ya esta dado
+                dispatchTakePictureIntent();
             }
-        }
-        else{
+        } else {
             // la versión alcanza con tenerlo declarado
-            Toast.makeText(FormReclamo.this, "La version alcanza, no hace falta pedir", Toast.LENGTH_SHORT).show();
+            dispatchTakePictureIntent();
         }
     }
 
@@ -259,8 +270,8 @@ public class FormReclamo extends AppCompatActivity {
                 // si el request es cancelado el arreglo es vacio.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(FormReclamo.this, "Pidio camara y acepto", Toast.LENGTH_SHORT).show();
-                    // tengo el permiso!!!.
+                    // tengo el permiso, saco la foto!!!
+                    dispatchTakePictureIntent();
                 } else {
                     Toast.makeText(FormReclamo.this, "Pidio camara y rechazo", Toast.LENGTH_SHORT).show();
                 }
@@ -277,6 +288,16 @@ public class FormReclamo extends AppCompatActivity {
                 }
                 return;
             }
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) !=
+                null) {
+            startActivityForResult(takePictureIntent,
+                    REQUEST_IMAGE_CAPTURE);
         }
     }
 
@@ -324,11 +345,50 @@ public class FormReclamo extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == MAP_REQ) {
-            if(resultCode == RESULT_OK) {
-                lugar = data.getParcelableExtra(MapsActivity.LUGAR_KEY);
-                editTextLugar.setText(lugar.toString());
-            }
+        switch(requestCode) {
+            case MAP_REQ:
+                if (resultCode == RESULT_OK) {
+                    lugar = data.getParcelableExtra(MapsActivity.LUGAR_KEY);
+                    editTextLugar.setText(lugar.toString());
+                }
+                break;
+            case REQUEST_IMAGE_CAPTURE:
+                if (resultCode == RESULT_OK) {
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    imgFotoReclamo.setImageBitmap(imageBitmap);
+                    saveImageInStorage(imageBitmap);
+                }
+                break;
+        }
+    }
+
+    private void saveImageInStorage(Bitmap imageReclamo) {
+        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdir();
+        File mypath = new File(directory, "reclamo_" + reclamo.getId() + ".jpg");
+        try {
+            FileOutputStream fos = new FileOutputStream(mypath);
+            imageReclamo.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadImageFromStorage() {
+        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
+        try {
+            File f=new File(directory, "reclamo_" + reclamo.getId() + ".jpg");
+            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+            imgFotoReclamo.setImageBitmap(b);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }
