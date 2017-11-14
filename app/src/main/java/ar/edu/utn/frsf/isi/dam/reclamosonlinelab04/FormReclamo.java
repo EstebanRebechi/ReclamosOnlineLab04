@@ -3,7 +3,6 @@ package ar.edu.utn.frsf.isi.dam.reclamosonlinelab04;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.admin.ConnectEvent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -66,12 +66,13 @@ public class FormReclamo extends AppCompatActivity {
     private Button btnPlayAudio;
     private Button btnCargarFoto;
     private ImageView imgFotoReclamo;
-
     private ReclamoDao reclamoDao;
+    private TextView frmReclamoLblFoto;
 
     private Reclamo reclamo;
     private LatLng lugar;
     private List<TipoReclamo> listaTiposReclamo;
+    private ArrayAdapter<TipoReclamo> adapterTiposReclamo;
 
     private boolean flagNuevoReclamo;
 
@@ -111,6 +112,8 @@ public class FormReclamo extends AppCompatActivity {
         btnGrabarAudio = (Button) findViewById(R.id.frmReclamoRecAudio);
         btnPlayAudio = (Button) findViewById(R.id.frmReclamoPlayAudio);
         imgFotoReclamo = (ImageView) findViewById(R.id.frmReclamoImgFoto);
+        frmReclamoLblFoto = (TextView) findViewById(R.id.frmReclamoLblFoto);
+        btnPlayAudio = (Button) findViewById(R.id.frmReclamoPlayAudio);
     }
 
     private void setearListeners() {
@@ -124,7 +127,8 @@ public class FormReclamo extends AppCompatActivity {
 
     private void inicializarSpinner() {
         listaTiposReclamo = new ArrayList<>();
-        ArrayAdapter<TipoReclamo> adapterTiposReclamo = new ArrayAdapter<TipoReclamo>(this, android.R.layout.simple_spinner_item, listaTiposReclamo);
+        adapterTiposReclamo = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, listaTiposReclamo);
         spinnerTipoReclamo.setAdapter(adapterTiposReclamo);
         obtenerTiposReclamo();
     }
@@ -136,6 +140,7 @@ public class FormReclamo extends AppCompatActivity {
                 List<TipoReclamo> rec = reclamoDao.tiposReclamo();
                 listaTiposReclamo.clear();
                 listaTiposReclamo.addAll(rec);
+                adapterTiposReclamo.notifyDataSetChanged();
             }
         };
         Thread t = new Thread(r);
@@ -149,7 +154,15 @@ public class FormReclamo extends AppCompatActivity {
         if(lugar != null) {
             editTextLugar.setText(lugar.toString());
         }
-        spinnerTipoReclamo.setSelection(((ArrayAdapter) spinnerTipoReclamo.getAdapter()).getPosition(reclamo.getTipo()));
+        spinnerTipoReclamo.setSelection(adapterTiposReclamo.getPosition(reclamo.getTipo()));
+        try {
+            loadImageFromStorage(reclamo.getId());
+            imgFotoReclamo.setVisibility(View.VISIBLE);
+            frmReclamoLblFoto.setVisibility(View.VISIBLE);
+        } catch(FileNotFoundException e) {
+            imgFotoReclamo.setVisibility(View.INVISIBLE);
+            frmReclamoLblFoto.setVisibility(View.INVISIBLE);
+        }
     }
 
     private class ElegirLugarListener implements View.OnClickListener {
@@ -353,12 +366,12 @@ public class FormReclamo extends AppCompatActivity {
                 }
                 break;
             case REQUEST_IMAGE_CAPTURE:
-                if (resultCode == RESULT_OK) {
-                    Bundle extras = data.getExtras();
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    imgFotoReclamo.setImageBitmap(imageBitmap);
-                    saveImageInStorage(imageBitmap);
-                }
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                imgFotoReclamo.setImageBitmap(imageBitmap);
+                imgFotoReclamo.setVisibility(View.VISIBLE);
+                frmReclamoLblFoto.setVisibility(View.VISIBLE);
+                saveImageInStorage(imageBitmap);
                 break;
         }
     }
@@ -380,15 +393,10 @@ public class FormReclamo extends AppCompatActivity {
         }
     }
 
-    private void loadImageFromStorage() {
+    private void loadImageFromStorage(int idReclamo) throws FileNotFoundException {
         File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
-        try {
-            File f=new File(directory, "reclamo_" + reclamo.getId() + ".jpg");
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            imgFotoReclamo.setImageBitmap(b);
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        File f = new File(directory, "reclamo_" + idReclamo + ".jpg");
+        Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+        imgFotoReclamo.setImageBitmap(b);
     }
 }
