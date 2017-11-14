@@ -8,4 +8,6 @@
     <string name="Reclamo_Eliminado">El reclamo ha sido eliminado</string>
     <string name="map_info_text">Arrastre el marcador al lugar deseado.</string>
     <string name="buttonListo">Listo</string>
+    <string name="No_hay_lugares">Ninguno de los reclamos tiene lugares</string>
+    <string name="No_hay_reclamos">No hay reclamos para mostrar</string>
 </resources>

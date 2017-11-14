@@ -17,10 +17,17 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
     </ListView>
+
     <Button
         android:id="@+id/btnNuevoReclamo"
-        android:text="Nuevo Reclamo!"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Nuevo Reclamo!"/>
+
+    <Button
+        android:id="@+id/btnVerTodos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ver todos en el mapa"/>
 
 </LinearLayout>
