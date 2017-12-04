@@ -1,15 +1,17 @@
 package ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by mdominguez on 26/10/17.
  */
 
-public class Reclamo implements Serializable{
+public class Reclamo implements Parcelable {
     private Integer id;
     private String titulo;
     private String detalle;
@@ -33,6 +35,44 @@ public class Reclamo implements Serializable{
         this.estado = estado;
         this.lugar = lugar;
     }
+
+    protected Reclamo(Parcel in) {
+        id = in.readInt();
+        titulo = in.readString();
+        detalle = in.readString();
+        fecha = (Date) in.readSerializable();
+        tipo = in.readParcelable(TipoReclamo.class.getClassLoader());
+        estado = in.readParcelable(Estado.class.getClassLoader());
+        lugar = in.readParcelable(LatLng.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(titulo);
+        dest.writeString(detalle);
+        dest.writeSerializable(fecha);
+        dest.writeParcelable(tipo, flags);
+        dest.writeParcelable(estado, flags);
+        dest.writeParcelable(lugar, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Reclamo> CREATOR = new Creator<Reclamo>() {
+        @Override
+        public Reclamo createFromParcel(Parcel in) {
+            return new Reclamo(in);
+        }
+
+        @Override
+        public Reclamo[] newArray(int size) {
+            return new Reclamo[size];
+        }
+    };
 
     public Integer getId() {
         return id;

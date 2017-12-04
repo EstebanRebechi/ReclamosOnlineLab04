@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,8 +88,26 @@ public class ReclamoDaoHTTP implements ReclamoDao {
                 Reclamo recTmp = new Reclamo();
                 recTmp.setId(unaFila.getInt("id"));
                 recTmp.setTitulo(unaFila.getString("titulo"));
+                recTmp.setDetalle(unaFila.getString("detalle"));
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    String fechaString = unaFila.getString("fecha");
+                    recTmp.setFecha(sdf.parse(fechaString));
+                } catch(ParseException e) {
+                    // no tiene fecha. No se hace nada
+                }
                 recTmp.setTipo(this.getTipoReclamoById(unaFila.getInt("tipoId")));
                 recTmp.setEstado(this.getEstadoById(unaFila.getInt("estadoId")));
+                try {
+                    String lugarString = unaFila.getString("lugar");
+                    int index = lugarString.indexOf(';');
+                    double lat = Double.parseDouble(lugarString.substring(0,index));
+                    double lng = Double.parseDouble(lugarString.substring(index+1));
+                    LatLng lugar = new LatLng(lat, lng);
+                    recTmp.setLugar(lugar);
+                } catch(JSONException e) {
+                    // no tiene lugar. No se hace nada
+                }
                 listaReclamos.add(recTmp);
             }
         } catch (JSONException e) {

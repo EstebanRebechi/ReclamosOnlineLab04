@@ -16,6 +16,11 @@ import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.Reclamo;
 
 public class HttpAsyncTask extends AsyncTask {
 
+    public static final int CREAR = 1;
+    public static final int ACTUALIZAR = 2;
+    public static final int BORRAR = 3;
+    public static final int RECLAMOS = 4;
+    public static final int ESTADO_BY_ID = 5;
 
     @Override
     protected Object doInBackground(Object[] objects) {
@@ -30,19 +35,19 @@ public class HttpAsyncTask extends AsyncTask {
         try {
 
             switch (opcion){
-                case 1:
+                case CREAR:
                     reclamoDao.crear(nuevoReclamo);
                     break;
-                case 2:
+                case ACTUALIZAR:
                     reclamoDao.actualizar(nuevoReclamo);
                     break;
-                case 3:
+                case BORRAR:
                     reclamoDao.borrar(nuevoReclamo);
                     break;
-                case 4:
+                case RECLAMOS:
                     reclamos = reclamoDao.reclamos();
                     return reclamos;
-                case 5:
+                case ESTADO_BY_ID:
                     estado = reclamoDao.getEstadoById(id);
 
                     return estado;

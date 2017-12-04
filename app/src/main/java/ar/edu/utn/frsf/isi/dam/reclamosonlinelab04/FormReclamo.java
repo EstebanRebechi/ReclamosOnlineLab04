@@ -55,7 +55,7 @@ public class FormReclamo extends AppCompatActivity {
         intentOrigen = getIntent();
 
         // obtengo el reclamo pasado en el bundle
-        reclamo = (Reclamo) intentOrigen.getSerializableExtra("reclamo");
+        reclamo = intentOrigen.getParcelableExtra("reclamo");
         // si es null (no se pasó ningun reclamo) entonces se desea crear uno nuevo
         flagNuevoReclamo = reclamo == null;
 
@@ -90,7 +90,7 @@ public class FormReclamo extends AppCompatActivity {
 
     private void inicializarSpinner() {
         listaTiposReclamo = new ArrayList<>();
-        ArrayAdapter<TipoReclamo> adapterTiposReclamo = new ArrayAdapter<TipoReclamo>(this, android.R.layout.simple_spinner_item, listaTiposReclamo);
+        ArrayAdapter<TipoReclamo> adapterTiposReclamo = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, listaTiposReclamo);
         spinnerTipoReclamo.setAdapter(adapterTiposReclamo);
         obtenerTiposReclamo();
     }
@@ -121,7 +121,7 @@ public class FormReclamo extends AppCompatActivity {
     private class ElegirLugarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent(FormReclamo.this,MapsActivity.class);
+            Intent intent = new Intent(FormReclamo.this, MapsActivity.class);
             if(lugar != null) {
                 intent.putExtra(MapsActivity.LUGAR_KEY, lugar);
             }
@@ -137,25 +137,23 @@ public class FormReclamo extends AppCompatActivity {
             String titulo = editTextTitulo.getText().toString();
             String detalle = editTextDetalle.getText().toString();
             TipoReclamo tipoReclamo = (TipoReclamo) spinnerTipoReclamo.getSelectedItem();
-            Boolean esNuevo = false;
 
             if(flagNuevoReclamo) {
-                esNuevo = true;
                 Estado estado = null; //El estado para un nuevo reclamo es "enviado" y tiene id 1
                 int id = 0;
                 try {
                     id = obtenerNuevoID();
                     estado = getEstadoById(1);
-                } catch (ExecutionException e) {
+                } catch(ExecutionException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
                 Date fecha = new Date();
 
                 // creo el reclamo y lo paso a la capa dao para guardar
                 Reclamo nuevoReclamo = new Reclamo(id, titulo, detalle, fecha, tipoReclamo, estado, lugar);
-                new HttpAsyncTask().execute(nuevoReclamo, 1, 0);
+                new HttpAsyncTask().execute(nuevoReclamo, HttpAsyncTask.CREAR, 0);
             } else {
                 // seteo los atributos del reclamo existente y lo paso a la capa dao para actualizar
                 reclamo.setTitulo(titulo);
@@ -163,7 +161,7 @@ public class FormReclamo extends AppCompatActivity {
                 reclamo.setTipo(tipoReclamo);
                 reclamo.setLugar(lugar);
 
-                new HttpAsyncTask().execute(reclamo, 2, 0);
+                new HttpAsyncTask().execute(reclamo, HttpAsyncTask.ACTUALIZAR, 0);
             }
 
             setResult(RESULT_OK, intentOrigen);
@@ -175,7 +173,7 @@ public class FormReclamo extends AppCompatActivity {
         List<Reclamo> reclamos;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        reclamos = (List<Reclamo>) as.execute(null, 4, 0).get();
+        reclamos = (List<Reclamo>) as.execute(null, HttpAsyncTask.RECLAMOS, 0).get();
 
         int id = -1;
         for(Reclamo r : reclamos) {
@@ -190,7 +188,7 @@ public class FormReclamo extends AppCompatActivity {
         Estado estado;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        estado = (Estado) as.execute(null, 5, id).get();
+        estado = (Estado) as.execute(null, HttpAsyncTask.ESTADO_BY_ID, id).get();
 
         return estado;
     }
@@ -199,7 +197,7 @@ public class FormReclamo extends AppCompatActivity {
     private class EliminarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            new HttpAsyncTask().execute(reclamo, 3, 0);
+            new HttpAsyncTask().execute(reclamo, HttpAsyncTask.BORRAR, 0);
             setResult(RESULT_DELETED, intentOrigen);
             finish();
         }

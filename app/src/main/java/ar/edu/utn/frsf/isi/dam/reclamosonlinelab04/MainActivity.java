@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Reclamo> listaReclamos;
     private ReclamoAdapter adapter;
     private Button btnNuevoReclamo;
+    private Button btnVerTodosEnMapa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnNuevoReclamo = (Button) findViewById(R.id.btnNuevoReclamo);
         btnNuevoReclamo.setOnClickListener(new NuevoReclamoListener());
+        btnVerTodosEnMapa = (Button) findViewById(R.id.btnVerTodos);
+        btnVerTodosEnMapa.setOnClickListener(new VerTodosEnMapaListener());
     }
 
     private void obtenerReclamos() {
@@ -85,6 +90,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class VerTodosEnMapaListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            if(listaReclamos.isEmpty()) {
+                Toast.makeText(MainActivity.this, R.string.No_hay_reclamos, Toast.LENGTH_LONG).show();
+            } else {
+                ArrayList<Reclamo> listaReclamosConLugares = new ArrayList<>();
+                for(Reclamo reclamo : listaReclamos) {
+                    if(reclamo.getLugar() != null) {
+                        listaReclamosConLugares.add(reclamo);
+                    }
+                }
+                if(listaReclamosConLugares.isEmpty()) {
+                    Toast.makeText(MainActivity.this, R.string.No_hay_lugares, Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                    intent.putExtra(MapsActivity.LISTA_RECLAMOS_KEY, listaReclamosConLugares);
+                    startActivity(intent);
+                }
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
@@ -119,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
+                break;
             }
         }
     }
