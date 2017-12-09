@@ -9,12 +9,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -31,7 +34,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +53,7 @@ public class FormReclamo extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_VOICE = 4;
     private static final int REQUEST_IMAGE_CAPTURE = 5;
     private static final int RESULT_OK = 6;
+    private static final String LOG_TAG = "AudioRecordTest";
 
     private Intent intentOrigen;
 
@@ -76,6 +79,13 @@ public class FormReclamo extends AppCompatActivity {
 
     private boolean flagNuevoReclamo;
 
+    private MediaRecorder recorder = null;
+    private MediaPlayer player = null;
+    private Boolean grabando = false;
+    private Boolean reproduciendo = false;
+
+    private File audio = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +107,13 @@ public class FormReclamo extends AppCompatActivity {
             mostrarDatosReclamo();
         }
         btnEliminar.setEnabled(!flagNuevoReclamo);
+        File directory = getApplicationContext().getDir("audios", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdir();
+        audio = new File(directory, "reclamo_" + reclamo.getId() + ".3gp");
+        btnPlayAudio.setEnabled(false);
+        if(audio.exists())
+            btnPlayAudio.setEnabled(true);
     }
 
     private void obtenerViews() {
@@ -123,6 +140,7 @@ public class FormReclamo extends AppCompatActivity {
         btnCancelar.setOnClickListener(new CancelarListener());
         btnCargarFoto.setOnClickListener(new CargarFotoListener());
         btnGrabarAudio.setOnClickListener(new GrabarAudioListener());
+        btnPlayAudio.setOnClickListener(new PlayAudioListener());
     }
 
     private void inicializarSpinner() {
@@ -140,7 +158,6 @@ public class FormReclamo extends AppCompatActivity {
                 List<TipoReclamo> rec = reclamoDao.tiposReclamo();
                 listaTiposReclamo.clear();
                 listaTiposReclamo.addAll(rec);
-                adapterTiposReclamo.notifyDataSetChanged();
             }
         };
         Thread t = new Thread(r);
@@ -223,7 +240,12 @@ public class FormReclamo extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            askForPermission(Manifest.permission.CAMERA, FormReclamo.PERMISSION_REQUEST_CAMERA, getString(R.string.solicitud_permiso_foto));
+            if(hasPermission(Manifest.permission.CAMERA)){
+                dispatchTakePictureIntent();
+            } else {
+                askForPermission(Manifest.permission.CAMERA, FormReclamo.PERMISSION_REQUEST_CAMERA,
+                        getString(R.string.solicitud_permiso_foto));
+            }
         }
     }
 
@@ -231,50 +253,79 @@ public class FormReclamo extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            askForPermission(Manifest.permission.RECORD_AUDIO, FormReclamo.PERMISSION_REQUEST_VOICE, getString(R.string.solicitud_permiso_audio));
+            if (grabando) {
+                grabando = false;
+                stopRecordingAudio();
+            } else {
+                if(hasPermission(Manifest.permission.RECORD_AUDIO)){
+                    grabando = true;
+                    startRecordingAudio();
+                } else {
+                    askForPermission(Manifest.permission.RECORD_AUDIO,
+                            FormReclamo.PERMISSION_REQUEST_VOICE, getString(R.string.solicitud_permiso_audio));
+                }
+            }
         }
     }
 
-    public void askForPermission(final String permisoManifest, final int codigoPermiso, String rationaleMsgStr){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(FormReclamo.this,
-                    permisoManifest)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(FormReclamo.this,
-                        permisoManifest)) {
-                    // Por lo que entiendo, esto lo pide solamente si ya intento varias veces y
-                    // hay que hacerle una explicacion mas detallada de por que necesitamos el permiso
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FormReclamo.this);
-                    builder.setTitle(R.string.titulo_dialog);
-                    builder.setPositiveButton(android.R.string.ok,null);
-                    builder.setMessage(rationaleMsgStr);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @TargetApi(Build.VERSION_CODES.M)
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            requestPermissions(
-                                    new String[]
-                                            {permisoManifest}
-                                    , codigoPermiso);
-                        }
-                    });
-                    builder.show();
-                } else {
-                    // Abre el dialogo para pedir el permiso del a camara.
-                    ActivityCompat.requestPermissions(FormReclamo.this,
-                            new String[]
-                                    {permisoManifest},
-                            codigoPermiso);
-                }
+    private class PlayAudioListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            if(reproduciendo) {
+                btnPlayAudio.setText("PLAY AUDIO");
+                reproduciendo=false;
+                stopPlayingAudio();
             } else {
-                // El permiso ya esta dado
-                dispatchTakePictureIntent();
+                btnPlayAudio.setText("PAUSAR");
+                reproduciendo=true;
+                startPlayingAudio();
             }
-        } else {
-            // la versión alcanza con tenerlo declarado
-            dispatchTakePictureIntent();
         }
     }
+
+    public boolean hasPermission(final String permisoManifest){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // la versión alcanza con tenerlo declarado
+            return true;
+        }
+        if (ContextCompat.checkSelfPermission(FormReclamo.this, permisoManifest)
+                == PackageManager.PERMISSION_GRANTED) {
+            // El permiso ya esta dado
+            return true;
+        }
+        return false;
+    }
+
+    public void askForPermission(final String permisoManifest, final int codigoPermiso, String rationaleMsgStr){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(FormReclamo.this,
+                permisoManifest)) {
+            // Por lo que entiendo, esto lo pide solamente si ya intento varias veces y
+            // hay que hacerle una explicacion mas detallada de por que necesitamos el permiso
+            AlertDialog.Builder builder = new AlertDialog.Builder(FormReclamo.this);
+            builder.setTitle(R.string.titulo_dialog);
+            builder.setPositiveButton(android.R.string.ok,null);
+            builder.setMessage(rationaleMsgStr);
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @TargetApi(Build.VERSION_CODES.M)
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    requestPermissions(
+                            new String[]
+                                    {permisoManifest}
+                            , codigoPermiso);
+                }
+            });
+            builder.show();
+        } else {
+            // Abre el dialogo para pedir el permiso del a camara.
+            ActivityCompat.requestPermissions(FormReclamo.this,
+                    new String[]
+                            {permisoManifest},
+                    codigoPermiso);
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],int[] grantResults) {
@@ -296,6 +347,7 @@ public class FormReclamo extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(FormReclamo.this, "Pidio audio y acepto", Toast.LENGTH_SHORT).show();
                     // tengo el permiso!!!.
+                    startRecordingAudio();
                 } else {
                     Toast.makeText(FormReclamo.this, "Pidio audio y rechazo", Toast.LENGTH_SHORT).show();
                 }
@@ -312,6 +364,46 @@ public class FormReclamo extends AppCompatActivity {
             startActivityForResult(takePictureIntent,
                     REQUEST_IMAGE_CAPTURE);
         }
+    }
+
+    private void startRecordingAudio() {
+        btnGrabarAudio.setText("PARAR");
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        System.out.println("ACAaaaaaaaaaa" +   audio.getAbsolutePath());
+        recorder.setOutputFile(audio.getAbsolutePath());
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        try {
+            recorder.prepare();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+        recorder.start();
+    }
+
+    private void stopRecordingAudio() {
+        btnGrabarAudio.setText("GRABAR AUDIO");
+        recorder.stop();
+        recorder.release();
+        recorder = null;
+        btnPlayAudio.setEnabled(true);
+    }
+
+    private void startPlayingAudio() {
+        player = new MediaPlayer();
+        try {
+            player.setDataSource(audio.getAbsolutePath());
+            player.prepare();
+            player.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopPlayingAudio() {
+        player.release();
+        player = null;
     }
 
     private int obtenerNuevoID() throws ExecutionException, InterruptedException {
@@ -337,7 +429,6 @@ public class FormReclamo extends AppCompatActivity {
 
         return estado;
     }
-
 
     private class EliminarListener implements View.OnClickListener {
         @Override

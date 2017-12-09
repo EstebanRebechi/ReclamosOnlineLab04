@@ -3,9 +3,8 @@
     {
       "id": 1,
       "titulo": "Esquina Peligrosa",
-      "detalle": "Necesitamos un semaforo de 4 tiempos con fotomulta",
-      "fecha": "",
-      "tipoId": 8,
+      "detalle": "",
+      "tipoId": 3,
       "estadoId": 5
     },
     {
