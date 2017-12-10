@@ -45,23 +45,23 @@ import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.Estado;
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.Reclamo;
 import ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.modelo.TipoReclamo;
 
-public class FormReclamo extends AppCompatActivity {
+public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
 
     public static final int MAP_REQ = 1;
     public static final int RESULT_DELETED = 2;
+
+    private static final String LOG_TAG = "AudioRecordTest";
     private static final int PERMISSION_REQUEST_CAMERA = 3;
     private static final int PERMISSION_REQUEST_VOICE = 4;
     private static final int REQUEST_IMAGE_CAPTURE = 5;
-    private static final int RESULT_OK = 6;
-    private static final String LOG_TAG = "AudioRecordTest";
 
     private Intent intentOrigen;
 
     private EditText editTextTitulo;
     private EditText editTextDetalle;
     private EditText editTextLugar;
-    private Button btnElegirLugar;
     private Spinner spinnerTipoReclamo;
+    private Button btnElegirLugar;
     private Button btnGuardar;
     private Button btnEliminar;
     private Button btnCancelar;
@@ -69,21 +69,19 @@ public class FormReclamo extends AppCompatActivity {
     private Button btnPlayAudio;
     private Button btnCargarFoto;
     private ImageView imgFotoReclamo;
-    private ReclamoDao reclamoDao;
     private TextView frmReclamoLblFoto;
 
+    private ReclamoDao reclamoDao;
     private Reclamo reclamo;
+    private boolean flagNuevoReclamo;
     private LatLng lugar;
     private List<TipoReclamo> listaTiposReclamo;
     private ArrayAdapter<TipoReclamo> adapterTiposReclamo;
-
-    private boolean flagNuevoReclamo;
 
     private MediaRecorder recorder = null;
     private MediaPlayer player = null;
     private Boolean grabando = false;
     private Boolean reproduciendo = false;
-
     private File audio = null;
 
     @Override
@@ -92,28 +90,31 @@ public class FormReclamo extends AppCompatActivity {
         setContentView(R.layout.activity_form_reclamo);
 
         intentOrigen = getIntent();
-
-        // obtengo el reclamo pasado en el bundle
-        reclamo = (Reclamo) intentOrigen.getSerializableExtra("reclamo");
-        // si es null (no se pasó ningun reclamo) entonces se desea crear uno nuevo
-        flagNuevoReclamo = reclamo == null;
-
+        Bundle extras = intentOrigen.getExtras();
         reclamoDao = new ReclamoDaoHTTP();
-
+        // obtengo el ID del reclamo pasado en el intent
+        final Integer idReclamo = (extras != null) ? extras.getInt("idReclamo") : null;
         obtenerViews();
         setearListeners();
-        inicializarSpinner();
-        if(!flagNuevoReclamo) {
-            mostrarDatosReclamo();
+        inicializarSpinner(-1); //-1 para que no seleccione nada
+        btnEliminar.setEnabled(false);
+        flagNuevoReclamo = idReclamo==null;
+        if(!flagNuevoReclamo){
+            Runnable r = new Runnable(){
+                @Override
+                public void run() {
+                    reclamo = reclamoDao.getReclamoById(idReclamo);
+                    runOnUiThread(new Runnable(){
+                        @Override
+                        public void run() {
+                            mostrarDatosReclamo();
+                        }
+                    });
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
         }
-        btnEliminar.setEnabled(!flagNuevoReclamo);
-        File directory = getApplicationContext().getDir("audios", Context.MODE_PRIVATE);
-        if(!directory.exists())
-            directory.mkdir();
-        audio = new File(directory, "reclamo_" + reclamo.getId() + ".3gp");
-        btnPlayAudio.setEnabled(false);
-        if(audio.exists())
-            btnPlayAudio.setEnabled(true);
     }
 
     private void obtenerViews() {
@@ -143,21 +144,26 @@ public class FormReclamo extends AppCompatActivity {
         btnPlayAudio.setOnClickListener(new PlayAudioListener());
     }
 
-    private void inicializarSpinner() {
+    private void inicializarSpinner(final int selectedPosition) {
         listaTiposReclamo = new ArrayList<>();
         adapterTiposReclamo = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, listaTiposReclamo);
         spinnerTipoReclamo.setAdapter(adapterTiposReclamo);
-        obtenerTiposReclamo();
-    }
 
-    private void obtenerTiposReclamo() {
-        Runnable r = new Runnable() {
+        Runnable r = new Runnable(){
             @Override
             public void run() {
                 List<TipoReclamo> rec = reclamoDao.tiposReclamo();
                 listaTiposReclamo.clear();
                 listaTiposReclamo.addAll(rec);
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run() {
+                        adapterTiposReclamo.notifyDataSetChanged();
+                        if(selectedPosition >= 0)
+                            spinnerTipoReclamo.setSelection(selectedPosition);
+                    }
+                });
             }
         };
         Thread t = new Thread(r);
@@ -171,7 +177,9 @@ public class FormReclamo extends AppCompatActivity {
         if(lugar != null) {
             editTextLugar.setText(lugar.toString());
         }
-        spinnerTipoReclamo.setSelection(adapterTiposReclamo.getPosition(reclamo.getTipo()));
+        int indexTipoReclamo = listaTiposReclamo.indexOf(reclamo.getTipo());
+        inicializarSpinner(adapterTiposReclamo.getPosition(listaTiposReclamo.get(indexTipoReclamo)));
+        // Mostrar o no la imagen
         try {
             loadImageFromStorage(reclamo.getId());
             imgFotoReclamo.setVisibility(View.VISIBLE);
@@ -180,6 +188,15 @@ public class FormReclamo extends AppCompatActivity {
             imgFotoReclamo.setVisibility(View.INVISIBLE);
             frmReclamoLblFoto.setVisibility(View.INVISIBLE);
         }
+        // Habilitar o no audio
+        File directory = getApplicationContext().getDir("audios", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdir();
+        audio = new File(directory, "reclamo_" + reclamo.getId() + ".3gp");
+        btnPlayAudio.setEnabled(false);
+        if(audio.exists())
+            btnPlayAudio.setEnabled(true);
+        btnEliminar.setEnabled(true);
     }
 
     private class ElegirLugarListener implements View.OnClickListener {
@@ -201,10 +218,8 @@ public class FormReclamo extends AppCompatActivity {
             String titulo = editTextTitulo.getText().toString();
             String detalle = editTextDetalle.getText().toString();
             TipoReclamo tipoReclamo = (TipoReclamo) spinnerTipoReclamo.getSelectedItem();
-            Boolean esNuevo = false;
 
             if(flagNuevoReclamo) {
-                esNuevo = true;
                 Estado estado = null; //El estado para un nuevo reclamo es "enviado" y tiene id 1
                 int id = 0;
                 try {
@@ -219,21 +234,41 @@ public class FormReclamo extends AppCompatActivity {
 
                 // creo el reclamo y lo paso a la capa dao para guardar
                 Reclamo nuevoReclamo = new Reclamo(id, titulo, detalle, fecha, tipoReclamo, estado, lugar);
-                new HttpAsyncTask().execute(nuevoReclamo, 1, 0);
+                new HttpAsyncTask(FormReclamo.this).execute(nuevoReclamo, HttpAsyncTask.CREAR, 0);
             } else {
                 // seteo los atributos del reclamo existente y lo paso a la capa dao para actualizar
                 reclamo.setTitulo(titulo);
                 reclamo.setDetalle(detalle);
                 reclamo.setTipo(tipoReclamo);
                 reclamo.setLugar(lugar);
-                // TODO: SI TIENE FOTO GUARDAR. SI TIENE AUDIO HABILITAR REPRODUCIR. GUARDAR AUDIO.
 
-                new HttpAsyncTask().execute(reclamo, 2, 0);
+                new HttpAsyncTask(FormReclamo.this).execute(reclamo, HttpAsyncTask.ACTUALIZAR, 0);
             }
 
             setResult(RESULT_OK, intentOrigen);
+        }
+    }
+
+    private class EliminarListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            new HttpAsyncTask().execute(reclamo, HttpAsyncTask.BORRAR, 0);
+            setResult(RESULT_DELETED, intentOrigen);
             finish();
         }
+    }
+
+    private class CancelarListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            setResult(RESULT_CANCELED, intentOrigen);
+            finish();
+        }
+    }
+
+    @Override
+    public void onTaskCompleted() {
+        finish();
     }
 
     private class CargarFotoListener implements View.OnClickListener {
@@ -366,12 +401,35 @@ public class FormReclamo extends AppCompatActivity {
         }
     }
 
+    private void saveImageInStorage(Bitmap imageReclamo) {
+        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdir();
+        File mypath = new File(directory, "reclamo_" + reclamo.getId() + ".jpg");
+        try {
+            FileOutputStream fos = new FileOutputStream(mypath);
+            imageReclamo.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadImageFromStorage(int idReclamo) throws FileNotFoundException {
+        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
+        File f = new File(directory, "reclamo_" + idReclamo + ".jpg");
+        Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+        imgFotoReclamo.setImageBitmap(b);
+    }
+
     private void startRecordingAudio() {
         btnGrabarAudio.setText("PARAR");
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        System.out.println("ACAaaaaaaaaaa" +   audio.getAbsolutePath());
         recorder.setOutputFile(audio.getAbsolutePath());
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         try {
@@ -410,7 +468,7 @@ public class FormReclamo extends AppCompatActivity {
         List<Reclamo> reclamos;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        reclamos = (List<Reclamo>) as.execute(null, 4, 0).get();
+        reclamos = (List<Reclamo>) as.execute(null, HttpAsyncTask.GET_ALL_RECLAMOS, 0).get();
 
         int id = -1;
         for(Reclamo r : reclamos) {
@@ -425,26 +483,9 @@ public class FormReclamo extends AppCompatActivity {
         Estado estado;
         HttpAsyncTask as = new HttpAsyncTask();
 
-        estado = (Estado) as.execute(null, 5, id).get();
+        estado = (Estado) as.execute(null, HttpAsyncTask.GET_ESTADO_BY_ID, id).get();
 
         return estado;
-    }
-
-    private class EliminarListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            new HttpAsyncTask().execute(reclamo, 3, 0);
-            setResult(RESULT_DELETED, intentOrigen);
-            finish();
-        }
-    }
-
-    private class CancelarListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            setResult(RESULT_CANCELED, intentOrigen);
-            finish();
-        }
     }
 
     @Override
@@ -465,29 +506,5 @@ public class FormReclamo extends AppCompatActivity {
                 saveImageInStorage(imageBitmap);
                 break;
         }
-    }
-
-    private void saveImageInStorage(Bitmap imageReclamo) {
-        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
-        if(!directory.exists())
-            directory.mkdir();
-        File mypath = new File(directory, "reclamo_" + reclamo.getId() + ".jpg");
-        try {
-            FileOutputStream fos = new FileOutputStream(mypath);
-            imageReclamo.compress(Bitmap.CompressFormat.PNG, 90, fos);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadImageFromStorage(int idReclamo) throws FileNotFoundException {
-        File directory = getApplicationContext().getDir("imagenes", Context.MODE_PRIVATE);
-        File f = new File(directory, "reclamo_" + idReclamo + ".jpg");
-        Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-        imgFotoReclamo.setImageBitmap(b);
     }
 }

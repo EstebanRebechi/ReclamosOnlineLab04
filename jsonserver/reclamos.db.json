@@ -1,50 +1,31 @@
 {
   "reclamo": [
     {
-      "id": 1,
-      "titulo": "Esquina Peligrosa",
-      "detalle": "",
-      "tipoId": 3,
-      "estadoId": 5
-    },
-    {
       "id": 2,
-      "titulo": "Ruidos Molestos",
-      "detalle": "Hay mucho ruido en la zona",
-      "fecha": "",
-      "tipoId": 3,
+      "titulo": "Rui j",
+      "detalle": "",
+      "tipoId": 5,
       "estadoId": 2
     },
     {
-      "id": 3,
-      "titulo": "Todo oscuro esto es un peligro",
-      "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
-      "fecha": "",
-      "tipoId": 5,
-      "estadoId": 4
-    },
-    {
       "id": 4,
-      "titulo": "No pasa el colectivo",
-      "detalle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed ",
-      "fecha": "",
-      "tipoId": 6,
+      "titulo": "Noa el colectivo",
+      "detalle": "",
+      "tipoId": 1,
       "estadoId": 2
     },
     {
       "id": 5,
       "titulo": "Todo oscuro esto es un peligro",
-      "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
-      "fecha": "",
-      "tipoId": 7,
+      "detalle": "",
+      "tipoId": 3,
       "estadoId": 4
     },
     {
       "id": 6,
-      "titulo": "Faltan camaras",
-      "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
-      "fecha": "",
-      "tipoId": 2,
+      "titulo": "Faltan camarasfff",
+      "detalle": "",
+      "tipoId": 1,
       "estadoId": 3
     },
     {
@@ -117,6 +98,13 @@
       "detalle": "consequuntur magni dolores eos qui ratione voluptatem sequi",
       "fecha": "",
       "tipoId": 5,
+      "estadoId": 1
+    },
+    {
+      "id": 16,
+      "titulo": "gggffc",
+      "detalle": "wsd",
+      "tipoId": 1,
       "estadoId": 1
     }
   ],

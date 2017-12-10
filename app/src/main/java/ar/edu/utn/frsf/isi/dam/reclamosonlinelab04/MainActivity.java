@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         listViewReclamos = (ListView) findViewById(R.id.mainListaReclamos);
         listaReclamos = new ArrayList<>();
         adapter = new ReclamoAdapter(this, listaReclamos);
-        new ReclamoAdapter(MainActivity.this, listaReclamos);
         listViewReclamos.setAdapter(adapter);
         listViewReclamos.setOnItemLongClickListener(new reclamosListener());
 
@@ -47,17 +46,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void obtenerReclamos() {
+        listaReclamos.clear();
+        adapter.notifyDataSetChanged();
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 List<Reclamo> rec = daoReclamo.reclamos();
-                listaReclamos.clear();
                 listaReclamos.addAll(rec);
                 runOnUiThread(new Runnable() {
                     public void run() {
-
                         adapter.notifyDataSetChanged();
-
                     }
                 });
             }
@@ -79,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
             Reclamo reclamoSeleccionado = (Reclamo) adapterView.getItemAtPosition(i);
             Intent intent = new Intent(MainActivity.this, FormReclamo.class);
-            intent.putExtra("reclamo", reclamoSeleccionado);
+            intent.putExtra("idReclamo", reclamoSeleccionado.getId());
             startActivityForResult(intent, VER_RECLAMO_REQUEST);
             return true;
         }
