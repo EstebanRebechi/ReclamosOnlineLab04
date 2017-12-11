@@ -6,6 +6,10 @@
     <string name="Reclamo_Actualizado">El reclamo ha sido actualizado</string>
     <string name="Actualizacion_Reclamo_Cancelada">El reclamo no ha sido actualizado</string>
     <string name="Reclamo_Eliminado">El reclamo ha sido eliminado</string>
+    <string name="cargar_imagen">Cargar Foto</string>
+    <string name="titulo_dialog">Solicitud de permisos</string>
+    <string name="solicitud_permiso_foto">Para poder capturar una foto es necesario que le des los permisos necesarios a la aplicación.</string>
+    <string name="solicitud_permiso_audio">Para poder grabar un audio es necesario que le des los permisos necesarios a la aplicación.</string>
     <string name="map_info_text">Arrastre el marcador al lugar deseado.</string>
     <string name="buttonListo">Listo</string>
     <string name="No_hay_lugares">Ninguno de los reclamos tiene lugares</string>

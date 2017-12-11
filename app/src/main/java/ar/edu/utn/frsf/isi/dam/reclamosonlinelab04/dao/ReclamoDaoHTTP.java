@@ -29,7 +29,7 @@ public class ReclamoDaoHTTP implements ReclamoDao {
     private MyGenericHTTPClient cliente;
 
     public ReclamoDaoHTTP(){
-        server="http://10.0.2.2:3000";
+        server="http://10.36.100.98:3000";
         cliente = new MyGenericHTTPClient(server);
     }
 
@@ -117,6 +117,22 @@ public class ReclamoDaoHTTP implements ReclamoDao {
     }
 
     @Override
+    public Reclamo getReclamoById(Integer id) {
+        Reclamo reclamo = new Reclamo();
+        String reclamoJsonString = cliente.getById("reclamo", id);
+        try {
+            JSONObject reclamoJSON = new JSONObject(reclamoJsonString);
+            reclamo.setId(reclamoJSON.getInt("id"));
+            reclamo.setTitulo(reclamoJSON.getString("titulo"));
+            reclamo.setTipo(this.getTipoReclamoById(reclamoJSON.getInt("tipoId")));
+            reclamo.setEstado(this.getEstadoById(reclamoJSON.getInt("estadoId")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return reclamo;
+    }
+
+    @Override
     public Estado getEstadoById(Integer id){
         Estado objResult =new Estado(99,"no encontrado");
         if(this.tiposEstados!=null){
@@ -167,8 +183,6 @@ public class ReclamoDaoHTTP implements ReclamoDao {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String fechaStr = sdf.format(fecha);
-
-
 
         try {
             nuevoReclamoJson.put("id", id);
@@ -223,8 +237,6 @@ public class ReclamoDaoHTTP implements ReclamoDao {
                 String longStr = longitud.toString();
                 reclamoJSON.put("lugar", latStr + ";" + longStr);
             }
-
-
 
         } catch (JSONException e) {
             e.printStackTrace();

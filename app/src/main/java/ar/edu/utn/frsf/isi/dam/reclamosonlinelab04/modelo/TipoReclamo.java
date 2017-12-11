@@ -68,4 +68,9 @@ public class TipoReclamo implements Parcelable {
     public String toString() {
         return tipo;
     }
+
+    @Override
+    public boolean equals(Object b){
+        return this.id == ((TipoReclamo) b).getId();
+    }
 }
