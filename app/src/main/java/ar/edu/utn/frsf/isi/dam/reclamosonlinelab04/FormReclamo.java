@@ -202,7 +202,7 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
     private class ElegirLugarListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent(FormReclamo.this,MapsActivity.class);
+            Intent intent = new Intent(FormReclamo.this, MapsActivity.class);
             if(lugar != null) {
                 intent.putExtra(MapsActivity.LUGAR_KEY, lugar);
             }
@@ -225,9 +225,9 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
                 try {
                     id = obtenerNuevoID();
                     estado = getEstadoById(1);
-                } catch (ExecutionException e) {
+                } catch(ExecutionException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
                 Date fecha = new Date();
@@ -482,9 +482,7 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
     private Estado getEstadoById(int id) throws ExecutionException, InterruptedException {
         Estado estado;
         HttpAsyncTask as = new HttpAsyncTask();
-
         estado = (Estado) as.execute(null, HttpAsyncTask.GET_ESTADO_BY_ID, id).get();
-
         return estado;
     }
 
