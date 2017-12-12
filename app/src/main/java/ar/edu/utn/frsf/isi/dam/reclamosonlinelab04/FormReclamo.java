@@ -94,6 +94,7 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
         reclamoDao = new ReclamoDaoHTTP();
         // obtengo el ID del reclamo pasado en el intent
         final Integer idReclamo = (extras != null) ? extras.getInt("idReclamo") : null;
+        final Integer nuevoIdEstadoReclamo = (extras != null) ? extras.getInt("idEstadoReclamo") : null;
         obtenerViews();
         setearListeners();
         inicializarSpinner(-1); //-1 para que no seleccione nada
@@ -104,6 +105,19 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
                 @Override
                 public void run() {
                     reclamo = reclamoDao.getReclamoById(idReclamo);
+                    if(nuevoIdEstadoReclamo != null) {
+                        // llego notif con cambio de estado, entonces lo cambio
+                        Estado nuevoEstado = null;
+                        try {
+                            nuevoEstado = getEstadoById(nuevoIdEstadoReclamo);
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        reclamo.setEstado(nuevoEstado);
+                        new HttpAsyncTask(FormReclamo.this).execute(reclamo, HttpAsyncTask.ACTUALIZAR, 0);
+                    }
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {

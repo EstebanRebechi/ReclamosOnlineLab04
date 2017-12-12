@@ -29,7 +29,7 @@ public class ReclamoDaoHTTP implements ReclamoDao {
     private MyGenericHTTPClient cliente;
 
     public ReclamoDaoHTTP(){
-        server="http://10.36.100.98:3000";
+        server="http://10.36.100.81:3000";
         cliente = new MyGenericHTTPClient(server);
     }
 
