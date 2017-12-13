@@ -12,11 +12,20 @@ import java.util.Map;
 
 public class ReclamosPushService extends FirebaseMessagingService {
     public ReclamosPushService() {
+        System.out.println("aca pushh" );
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("Refreshed token: SERVICIO caca CREADO!!!!"); // TODO
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage){
         super.onMessageReceived(remoteMessage);
+        System.out.println("aca ON MESSAGE RECEIVED " ); //TODO
+        System.out.println(remoteMessage); //TODO
         sendNotification(remoteMessage.getData());
     }
 
@@ -31,10 +40,13 @@ public class ReclamosPushService extends FirebaseMessagingService {
         int notificationId = 001;
         Intent resultIntent = new Intent (this, FormReclamo.class);
 
+        System.out.println("aca sendNotification " ); //TODO
+        System.out.println(data);
+
         Integer reclamoId = Integer.parseInt(data.get("idReclamo"));
         Integer reclamoEstadoId = Integer.parseInt(data.get("idEstadoReclamo"));
         resultIntent.putExtra("idReclamo",reclamoId);
-        resultIntent.putExtra("",reclamoEstadoId);
+        resultIntent.putExtra("idEstadoReclamo",reclamoEstadoId);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationManager notifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

@@ -94,7 +94,11 @@ public class ReclamoDaoHTTP implements ReclamoDao {
                     String fechaString = unaFila.getString("fecha");
                     recTmp.setFecha(sdf.parse(fechaString));
                 } catch(ParseException e) {
-                    // no tiene fecha. No se hace nada
+                    System.out.println("Formato de fecha invalido en el reclamo: " + recTmp.getTitulo());
+                } catch(JSONException e) {
+                    System.out.println("El reclamo: " + recTmp.getTitulo() + " no tiene fecha.");
+                } catch(Exception e){
+                    e.printStackTrace();
                 }
                 recTmp.setTipo(this.getTipoReclamoById(unaFila.getInt("tipoId")));
                 recTmp.setEstado(this.getEstadoById(unaFila.getInt("estadoId")));
@@ -106,7 +110,9 @@ public class ReclamoDaoHTTP implements ReclamoDao {
                     LatLng lugar = new LatLng(lat, lng);
                     recTmp.setLugar(lugar);
                 } catch(JSONException e) {
-                    // no tiene lugar. No se hace nada
+                    System.out.println("El reclamo: " + recTmp.getTitulo() + " no tiene lugar.");
+                } catch(Exception e){
+                    e.printStackTrace();
                 }
                 listaReclamos.add(recTmp);
             }

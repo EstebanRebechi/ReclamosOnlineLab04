@@ -9,13 +9,22 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 
 public class ReclamosInstanceId extends FirebaseInstanceIdService {
 
-    public ReclamosInstanceId(){}
+    public ReclamosInstanceId(){
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        System.out.println("Refreshed token: SERVICIO CREADO!!!!"); // TODO
+    }
 
     @Override
     public void onTokenRefresh() {
         // obtiene el token que lo identifica
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d("LAB04-3::", "Refreshed token: " + refreshedToken);
+        System.out.println("aca onTokenRefresh" ); //TODO
+        System.out.println(refreshedToken); //TODO
         guardarToken(refreshedToken);
     }
     private void guardarToken(String tkn){

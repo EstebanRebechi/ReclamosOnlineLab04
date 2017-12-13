@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "154871885695",
-    "firebase_url": "https://lab04-ef6f2.firebaseio.com",
-    "project_id": "lab04-ef6f2",
-    "storage_bucket": "lab04-ef6f2.appspot.com"
+    "project_number": "10771012930",
+    "firebase_url": "https://lab04prueba2.firebaseio.com",
+    "project_id": "lab04prueba2",
+    "storage_bucket": "lab04prueba2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:154871885695:android:1783dbcc7c6a9e30",
+        "mobilesdk_app_id": "1:10771012930:android:1783dbcc7c6a9e30",
         "android_client_info": {
           "package_name": "ar.edu.utn.frsf.isi.dam.reclamosonlinelab04"
         }
       },
       "oauth_client": [
         {
-          "client_id": "154871885695-oh8cuv66sjil644qo13jtcb487utk0vt.apps.googleusercontent.com",
+          "client_id": "10771012930-7s1m101qa7kljg82te597nbnhv9q89bj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCEetA2Oi_4Xj7J7oH5nssBJ8r4pwLyG0E"
+          "current_key": "AIzaSyAAUuiPpgbZhw5SBAHYMJD0SfqPRduZW8Q"
         }
       ],
       "services": {

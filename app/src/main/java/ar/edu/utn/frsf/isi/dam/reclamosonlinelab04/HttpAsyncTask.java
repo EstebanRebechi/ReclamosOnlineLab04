@@ -64,7 +64,6 @@ public class HttpAsyncTask extends AsyncTask {
                 default:
                     break;
             }
-
         }catch (Exception e){
             e.printStackTrace();
         }

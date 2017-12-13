@@ -94,30 +94,19 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
         reclamoDao = new ReclamoDaoHTTP();
         // obtengo el ID del reclamo pasado en el intent
         final Integer idReclamo = (extras != null) ? extras.getInt("idReclamo") : null;
-        final Integer nuevoIdEstadoReclamo = (extras != null) ? extras.getInt("idEstadoReclamo") : null;
         obtenerViews();
         setearListeners();
         inicializarSpinner(-1); //-1 para que no seleccione nada
         btnEliminar.setEnabled(false);
         flagNuevoReclamo = idReclamo==null;
         if(!flagNuevoReclamo){
+            btnPlayAudio.setEnabled(false);
+            btnGrabarAudio.setEnabled(true);
+            btnCargarFoto.setEnabled(true);
             Runnable r = new Runnable(){
                 @Override
                 public void run() {
                     reclamo = reclamoDao.getReclamoById(idReclamo);
-                    if(nuevoIdEstadoReclamo != null) {
-                        // llego notif con cambio de estado, entonces lo cambio
-                        Estado nuevoEstado = null;
-                        try {
-                            nuevoEstado = getEstadoById(nuevoIdEstadoReclamo);
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        reclamo.setEstado(nuevoEstado);
-                        new HttpAsyncTask(FormReclamo.this).execute(reclamo, HttpAsyncTask.ACTUALIZAR, 0);
-                    }
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
@@ -128,6 +117,10 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
             };
             Thread t = new Thread(r);
             t.start();
+        } else {
+            btnPlayAudio.setEnabled(false);
+            btnGrabarAudio.setEnabled(false);
+            btnCargarFoto.setEnabled(false);
         }
     }
 
@@ -307,7 +300,6 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
                 stopRecordingAudio();
             } else {
                 if(hasPermission(Manifest.permission.RECORD_AUDIO)){
-                    grabando = true;
                     startRecordingAudio();
                 } else {
                     askForPermission(Manifest.permission.RECORD_AUDIO,
@@ -334,7 +326,7 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
     }
 
     public boolean hasPermission(final String permisoManifest){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             // la versión alcanza con tenerlo declarado
             return true;
         }
@@ -441,6 +433,7 @@ public class FormReclamo extends AppCompatActivity implements OnTaskCompleted{
 
     private void startRecordingAudio() {
         btnGrabarAudio.setText("PARAR");
+        grabando = true;
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);

@@ -47,7 +47,7 @@
             android:label="@string/title_activity_maps" />
 
         <service
-            android:name=".ReclamosInstanceId"
+            android:name="ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.ReclamosInstanceId"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -55,7 +55,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".ReclamosPushService"
+            android:name="ar.edu.utn.frsf.isi.dam.reclamosonlinelab04.ReclamosPushService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

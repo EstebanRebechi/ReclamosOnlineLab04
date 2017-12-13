@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        checkGooglePlayServices();
         daoReclamo = new ReclamoDaoHTTP();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -50,6 +51,19 @@ public class MainActivity extends AppCompatActivity {
         btnVerTodosEnMapa.setOnClickListener(new VerTodosEnMapaListener());
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        checkGooglePlayServices();
+    }
+
+    private void checkGooglePlayServices() {
+        int gServicesCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        System.out.println("Google Play services status: " + GoogleApiAvailability.getInstance().getErrorString(gServicesCode));
+        if(gServicesCode != 0)
+            GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
+    }
+
     private void obtenerReclamos() {
         listaReclamos.clear();
         adapter.notifyDataSetChanged();
@@ -57,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 List<Reclamo> rec = daoReclamo.reclamos();
+                System.out.println("Cantidad de reclamos: " + rec.size());
+                for(Reclamo r: rec){
+                    System.out.println("Reclamo Titulo: " + r.getTitulo());
+                }
                 listaReclamos.addAll(rec);
                 runOnUiThread(new Runnable() {
                     public void run() {
