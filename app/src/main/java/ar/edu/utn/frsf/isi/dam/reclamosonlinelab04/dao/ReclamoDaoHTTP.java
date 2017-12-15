@@ -130,8 +130,32 @@ public class ReclamoDaoHTTP implements ReclamoDao {
             JSONObject reclamoJSON = new JSONObject(reclamoJsonString);
             reclamo.setId(reclamoJSON.getInt("id"));
             reclamo.setTitulo(reclamoJSON.getString("titulo"));
+            reclamo.setDetalle(reclamoJSON.getString("detalle"));
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                String fechaString = reclamoJSON.getString("fecha");
+                reclamo.setFecha(sdf.parse(fechaString));
+            } catch(ParseException e) {
+                System.out.println("Formato de fecha invalido en el reclamo: " + reclamo.getTitulo());
+            } catch(JSONException e) {
+                System.out.println("El reclamo: " + reclamo.getTitulo() + " no tiene fecha.");
+            } catch(Exception e){
+                e.printStackTrace();
+            }
             reclamo.setTipo(this.getTipoReclamoById(reclamoJSON.getInt("tipoId")));
             reclamo.setEstado(this.getEstadoById(reclamoJSON.getInt("estadoId")));
+            try {
+                String lugarString = reclamoJSON.getString("lugar");
+                int index = lugarString.indexOf(';');
+                double lat = Double.parseDouble(lugarString.substring(0,index));
+                double lng = Double.parseDouble(lugarString.substring(index+1));
+                LatLng lugar = new LatLng(lat, lng);
+                reclamo.setLugar(lugar);
+            } catch(JSONException e) {
+                System.out.println("El reclamo: " + reclamo.getTitulo() + " no tiene lugar.");
+            } catch(Exception e){
+                e.printStackTrace();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
